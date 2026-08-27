@@ -1,0 +1,18 @@
+# Секреты и локальное состояние
+.env
+*.session
+*.session-journal
+emoji-catalog.json
+emoji-extracted.json
+
+# Рабочие материалы (локальные черновики авторов)
+materials/
+output/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# macOS
+.DS_Store

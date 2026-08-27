@@ -1,0 +1,11 @@
+{
+  "max_sentence_words": 20,
+  "max_paragraph_chars": 500,
+  "max_emoji": 2,
+  "forbid_exclamation": true,
+  "forbid_hash": true,
+  "banned_phrases": [],
+  "required_phrases": [],
+  "extra_cliches": [],
+  "allow_words": []
+}
