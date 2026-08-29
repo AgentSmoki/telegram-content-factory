@@ -34,6 +34,10 @@ def cli() -> argparse.ArgumentParser:
     parser.add_argument(
         "--parse-mode", choices=("HTML", "MarkdownV2", "none"), default="none"
     )
+    parser.add_argument(
+        "--button", action="append", default=[], metavar="ТЕКСТ|URL",
+        help="inline-кнопка со ссылкой под постом; повторяемый флаг, каждая — новый ряд",
+    )
     parser.add_argument("--environment", choices=("test", "production"), default="test")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     parser.add_argument("--send", action="store_true")
@@ -41,9 +45,27 @@ def cli() -> argparse.ArgumentParser:
     return parser
 
 
+def parse_buttons(raw: list[str]) -> list[tuple[str, str]]:
+    """Разбирает «Текст|https://…» в пары (текст, url); валидирует схему."""
+    buttons = []
+    for item in raw:
+        label, sep, url = item.partition("|")
+        if not sep or not label.strip() or not url.startswith(("http://", "https://", "tg://")):
+            raise ValueError(f"кнопка задаётся как ТЕКСТ|URL (http/https/tg): {item!r}")
+        buttons.append((label.strip(), url.strip()))
+    return buttons
+
+
 def precheck(args: argparse.Namespace, text: str) -> list[str]:
     errors = []
     media = [*args.photo, *args.video]
+    try:
+        buttons = parse_buttons(args.button)
+    except ValueError as exc:
+        errors.append(str(exc))
+        buttons = []
+    if buttons and args.mode == "album":
+        errors.append("кнопки поддерживаются только в режиме plain — альбом их не принимает")
     if args.mode == "plain":
         if media:
             errors.append("режим plain отправляется без медиа — используй album")
@@ -64,10 +86,21 @@ async def deliver(args: argparse.Namespace, text: str) -> None:
     parse_mode = None if args.parse_mode == "none" else args.parse_mode
     media = [*args.photo, *args.video]
 
+    markup = None
+    buttons = parse_buttons(args.button)
+    if buttons:
+        from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+        markup = InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text=t, url=u)] for t, u in buttons]
+        )
+
     bot = Bot(token)
     try:
         if args.mode == "plain":
-            message = await bot.send_message(chat_id, text, parse_mode=parse_mode)
+            message = await bot.send_message(
+                chat_id, text, parse_mode=parse_mode, reply_markup=markup
+            )
             print(f"ОТПРАВЛЕНО: chat={message.chat.id} message_id={message.message_id}")
         else:
             group = [as_input_media(item) for item in media]
@@ -91,7 +124,11 @@ def main() -> int:
         for error in errors:
             print(f"ОШИБКА: {error}", file=sys.stderr)
         return 1
-    print(f"ВАЛИДНО: режим {args.mode}, {len(text)} симв.")
+    buttons = parse_buttons(args.button)
+    print(
+        f"ВАЛИДНО: режим {args.mode}, {len(text)} симв."
+        + (f", кнопок {len(buttons)}" if buttons else "")
+    )
 
     if not args.send:
         print("Сухой прогон. Для отправки добавь --send и точный --confirm-target.")

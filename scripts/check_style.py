@@ -106,7 +106,10 @@ DEFAULTS: dict[str, object] = {
     "required_phrases": [],
     "extra_cliches": [],
     "allow_words": [],
+    "ignore_quoted": True,
 }
+
+RE_QUOTED = re.compile(r"«[^»]*»|\"[^\"]*\"")
 
 
 @dataclass
@@ -136,17 +139,19 @@ def check(text: str, config: dict[str, object]) -> list[Finding]:
     cfg = {**DEFAULTS, **config}
     allow = {str(w).casefold() for w in cfg.get("allow_words", [])}
     low = text.casefold()
+    # Цитата штампа в «кавычках» — пример, а не штамп: словари её пропускают.
+    scan = RE_QUOTED.sub(" ", low) if cfg.get("ignore_quoted") else low
     findings: list[Finding] = []
 
     # Словари: штампы и канцелярит — FAIL, AI-slop — FAIL, оценочные — WARN.
     cliches = CLICHES + [str(p) for p in cfg.get("extra_cliches", [])]
-    findings += _find_phrases(low, cliches, "cliche", "FAIL", allow)
-    findings += _find_phrases(low, BUREAUCRAT, "bureaucrat", "FAIL", allow)
-    findings += _find_phrases(low, AI_SLOP, "ai_slop", "FAIL", allow)
-    findings += _find_phrases(low, EVALUATIVE, "evaluative", "WARN", allow)
+    findings += _find_phrases(scan, cliches, "cliche", "FAIL", allow)
+    findings += _find_phrases(scan, BUREAUCRAT, "bureaucrat", "FAIL", allow)
+    findings += _find_phrases(scan, AI_SLOP, "ai_slop", "FAIL", allow)
+    findings += _find_phrases(scan, EVALUATIVE, "evaluative", "WARN", allow)
 
     for phrase in cfg.get("banned_phrases", []):
-        if str(phrase).casefold() in low:
+        if str(phrase).casefold() in scan:
             findings.append(Finding("FAIL", "banned_phrase", repr(str(phrase))))
     for phrase in cfg.get("required_phrases", []):
         if str(phrase).casefold() not in low:

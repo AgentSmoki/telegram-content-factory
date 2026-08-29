@@ -34,6 +34,11 @@ class TestDictionaries(unittest.TestCase):
         findings = check("Запустил бота за вечер. Отвечает за 2 секунды)", {})
         self.assertEqual(rules(findings, "FAIL"), [])
 
+    def test_quoted_example_is_ignored(self):
+        text = "Фразу «важно отметить» гейт ловит сразу."
+        self.assertNotIn("ai_slop", rules(check(text, {})))
+        self.assertIn("ai_slop", rules(check(text, {"ignore_quoted": False}), "FAIL"))
+
     def test_allow_words_disables_rule(self):
         cfg = {"allow_words": ["данный"]}
         findings = check("Данный кейс разберу отдельно.", cfg)

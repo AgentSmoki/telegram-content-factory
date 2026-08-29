@@ -4,6 +4,12 @@
 
 Skill for Claude Code that turns raw ideas, voice notes, articles and videos into Telegram posts in the author's voice — with a three-pass editing pipeline, premium-emoji previews and dry-run-first publishing. Docs are in Russian.
 
+[![tests](https://img.shields.io/github/actions/workflow/status/AgentSmoki/telegram-content-factory/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/AgentSmoki/telegram-content-factory/actions)
+[![release](https://img.shields.io/github/v/release/AgentSmoki/telegram-content-factory?display_name=tag&style=flat-square)](https://github.com/AgentSmoki/telegram-content-factory/releases)
+[![license](https://img.shields.io/github/license/AgentSmoki/telegram-content-factory?style=flat-square)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-skill-D97757?style=flat-square)](SKILL.md)
+[![TeleTranscribe](https://img.shields.io/badge/транскрибация-TeleTranscribe-2CA5E0?style=flat-square)](https://github.com/AgentSmoki/TeleTransribe)
+
 ## Чем отличается от «генераторов постов»
 
 Генератор начинает с пустой страницы и заканчивает «каким-то текстом». Здесь — редакция целиком:
@@ -60,7 +66,7 @@ python3 scripts/doctor.py                # диагностика (офлайн)
 | `init_material.py` | пакет материала: один пост = одна проверяемая папка | нет |
 | `doctor.py` | диагностика установки | только с `--telegram` |
 | `publish_rich.py` | Rich Message; сухой прогон по умолчанию | только с `--send` |
-| `publish_fallback.py` | обычный пост или альбом 2–10 медиа | только с `--send` |
+| `publish_fallback.py` | обычный пост (с inline-кнопкой `--button "Текст\|URL"`) или альбом 2–10 медиа | только с `--send` |
 | `emoji_send.py` | превью с кастомными Premium-эмодзи через userbot | да, в превью-чат |
 | `emoji_extract.py` | выгрузка document_id из установленных emoji-паков | да, read-only |
 
