@@ -1,0 +1,25 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Офлайн-тесты валидатора и стилевого гейта
+        run: python -m unittest discover tests -v
+      - name: Смоук CLI без сети
+        run: |
+          python scripts/validate_rich.py assets/rich-post.example.html
+          python scripts/preview_rich.py assets/rich-post.example.html --out /tmp/preview.html
+          python scripts/doctor.py
