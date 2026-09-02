@@ -66,6 +66,7 @@ python3 scripts/doctor.py                # диагностика (офлайн)
 | `init_material.py` | пакет материала: один пост = одна проверяемая папка | нет |
 | `doctor.py` | диагностика установки | только с `--telegram` |
 | `publish_rich.py` | Rich Message; сухой прогон по умолчанию | только с `--send` |
+| `approve_send.py` | превью в личку автора + кнопки «✅ Опубликовать / ✖ Отмена»; галочка публикует в канал | да, превью + после ✅ |
 | `publish_fallback.py` | обычный пост (с inline-кнопкой `--button "Текст\|URL"`) или альбом 2–10 медиа | только с `--send` |
 | `emoji_send.py` | превью с кастомными Premium-эмодзи через userbot | да, в превью-чат |
 | `emoji_extract.py` | выгрузка document_id из установленных emoji-паков | да, read-only |

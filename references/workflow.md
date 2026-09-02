@@ -73,6 +73,13 @@ python3 scripts/publish_rich.py ... --environment production --send --confirm-ta
 
 Успешный тест — отдельное событие; прод требует своего одобрения.
 
+Удобный вариант гейта — кнопка в боте: `approve_send.py` присылает превью автору в личку с кнопками «✅ Опубликовать» / «✖ Отмена», и публикация происходит только после нажатия галочки автором (проверяется его user id из `TELEGRAM_APPROVER_ID`, кнопки одноразовые, по таймауту — отбой):
+
+```bash
+python3 scripts/approve_send.py --rich post-rich.html --photo cover=cover.png \
+  --publish-to production --confirm-target=@channel
+```
+
 ## 10. Замыкание петли
 
 После одобрения материала предложи автору (выполняй после согласия):
